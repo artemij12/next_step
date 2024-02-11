@@ -1,6 +1,6 @@
 #include "setup.h"
-unsigned int count_of_rotation = 0;//количество прерываний оптопары (ввел псевдоним u_int это unsigned int) 
-float time_of_rotation = 0;//время прерывания оптопары
+u_int count_of_rotation = 0;//количество прерываний оптопары (ввел псевдоним u_int это unsigned int) 
+float time_of_rotation = 0.0;//время прерывания оптопары
  //текущий пункт меню, хотя их у нас пока 2, но потом можем расширять, byte это unsigned char
 float litres=0.0; //количество литров, что будет выводиться на экран (можети не понадобится)
 enum rezhim
@@ -10,6 +10,9 @@ U = 0,W = 1,R = 2
 rezhim mode = U;
 void setup()
 {
+lcd.init();
+lcd.backlight();
+lcd.setCursor(0,0);
 pinMode(opt_pin,INPUT);//установка ножки камня на чтение сигналов из оптопары
 pinMode(set_pin,INPUT);
 pinMode(pusk_pin,INPUT);
@@ -31,18 +34,6 @@ byte push_btn(byte pin_)//
 //если нажата не долго 1
 //  дребезг или просто не нажата 0
 }
-/*bool push_set()
-{
-//считываем уровень сигнала на пине кнопки, если низкий уровень меньше времени min_push(выдежка,убираем дребезг контактов) сразу возвращаем False , иначе True
-  // функция millis() возвращает время из регистра который считает время с начала вкючения ардуинкипо большому счету считает тики камня и когда переполняется обнуляется и заново
-  // но т.к. регистр здоровый там на несколько недель по-моему 
-  int Min_t=millis();
-  while ((millis()-Min_t)<Min_push)
-    {
-      if (digitalRead(set_pin)==0) return False;
-    }
-  return True;
-}*/
 void print_char(byte c)// функция печати пункта меню
 {
  for(int i = 0;i <= 2;i++)
@@ -61,23 +52,49 @@ void print_char(byte c)// функция печати пункта меню
         lcd.print("R");
         delay(100);
         lcd.clear();
-  
+
   }
  }
 // Взависимости от значения с выводим на экран U/W/R(резет потом скидываем и вовращаемся в режим W)
 }
-void print_cyf(byte i)
+void print_cyf()
 {
-//Функция вывода на экран цифр, выводим i переведя его в строку 
+lcd.setCursor(0,1);
+float litres_prom = 0.0;
+switch (push_btn(set_pin))//эта функция работает так, что пока кнопка set отжата значение для юстировки увеличивается
+{                         //в случае ее кратковременного нажатия происходит остановка увеличения цифр   
+  case 0:                 //значения записываются в переменные а при длительном нажатии обнуляются
+  litres_prom+=0.1;
+  lcd.print(litres);
+  //delay(10);
+  lcd.clear();
+  case 1:
+    litres = litres_prom;
+    lcd.print(litres);
+    delay(100);
+    lcd.clear();
+    break;
+  case 2:
+    litres = 0;
+    litres_prom = 0;
+    lcd.print(String(litres)+" "+String(litres_prom));
+}
 }
 void start_inr() //устанавливаем прерывание , данные берем из setup.h
 {
+
 }
 void stop_inr() // убираем прерывание....Можно конечно и в цикле loop все это написать, но функциями сподручнее
 {
+
 }
-void count_rot()
+void count_rot_time()
 {
+  time_of_rotation+=pulseIn(opt_pin,LOW)*0.000001;
+  if(pulseIn(opt_pin,LOW)!=0)
+  {
+    count_of_rotation++;
+  }
 //в этой функции будет реализован подсчет количества оборотов крыльчатки и времени, на которое прерывается оптопара
 }
 void loop () 
@@ -86,24 +103,20 @@ void loop ()
   switch(mode)
   {
     case 0:
-      switch(push_btn(set_pin))
+      switch(push_btn(pusk_pin))//цифры появились на экране и сохранились в переменную litres
       {
         case 0:
         break;
         case 1:
-        
+        print_cyf();//после кратковременного нажатия идет зажим кнопки pusk и проливание воды без отжатия кнопки для того, чтобы не выйти 
+        case 2:     // из case2
+        count_rot_time();
       }
-  }
-
-            
-          
-      
+    save_rez(litres,short(count_of_rotation));
+    
 
       
-
-     
-    
-    
+  } 
   }  
 //здесь реализуем бесконечный цикл обработки нажатий клавиш
 // тут будет простая лесенка операторов выбора вида if push_set() { ....} else
@@ -128,7 +141,7 @@ void rezult(){
 void math_model()
 {
 }// это штука на будущее...отдельно от обработчиков надо создать матмодель, в которую мы передаем данные (скорей всего в структурах struct) и она уже считает все как надо
-void save_rez(short ob, short kolvj, short koeff)
+void save_rez(short ob, short kolvj)
 {
 //создаем условную табличку в EEPROM...Упакованную ...2 байта на каждую переменную...Читать легко, записывать еще проще..
 }
