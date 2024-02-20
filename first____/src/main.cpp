@@ -5,6 +5,7 @@ u_int count_of_rotation = 0;//количество прерываний опто
 float litres=0.0; //количество литров, что будет выводиться на экран (можети не понадобится)
 char rezhim[] = {'U','W','R'};
 byte mode=0;
+save_data S_D[10];
 /*enum rezhim
 {
 U = 0 ,W = 1 ,R = 2 
@@ -88,21 +89,20 @@ void stop_inr() // убираем прерывание....Можно конеч�
 {
 
 }
-u_int time_and_count () 
-{
-  float time_of_close = 0;
-  float time_of_open = 0;
+u_int time_and_count (float &time_of_close, float time_of_open) 
+{ 
+  u_int count_of_rotation;
   if(pulseIn(opt_pin,LOW)!=0)
   {
     time_of_close += pulseIn(opt_pin,LOW);
     count_of_rotation++;
   }
-  else if(pulseIn(opt_pin,HIGH)!=0)
+  if(pulseIn(opt_pin,HIGH)!=0)
   {
     time_of_open += pulseIn(opt_pin,HIGH);
     count_of_rotation++;
   }
-
+return count_of_rotation;
 //в этой функции будет реализован подсчет количества оборотов крыльчатки и времени, на которое прерывается оптопара
 }
 void loop () 
