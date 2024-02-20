@@ -101,7 +101,6 @@ u_int time_and_count ()
   {
     time_of_open += pulseIn(opt_pin,HIGH);
     count_of_rotation++;
-
   }
 
 //в этой функции будет реализован подсчет количества оборотов крыльчатки и времени, на которое прерывается оптопара
@@ -200,54 +199,3 @@ void print_rez_of_reset_2(){
 
 // 0000 3 2 1 0 // 1 0- 00 - нет нажатия , 0 1 - коротко , 1 0 - зажата 
 // 3 - set , 2 -pusk
-/*loop () 
-{
- flag=0;
- flag=push_btn(set_pin);
- flag|=push_btn(push_pin);
- if(!flag) continue;
-    switch(curpos)
-    {
-      case 1: //
-      {
-        if (flag&1<<4)//проверка бита флага нажатие кн. set 1<<4 10xx & 1000 = 1000
-      {
-        if (mode<=2)mode++;
-        else mode=0;
-      }
-      if (flag&1<<3)//проверка бита флага нажатия кнопки push
-      {
-        if (mode==0) curpos=2;//попадаем в п. меню 2 это режим "U" вывод 00.00 на экран и ввод литров для юстировки
-        if (mode==1) curpos=3;//покадаем в п. меню 3 это режим "W" где мы до нажатия кнопки Пуск льем бензин
-       } 
-      print_char(mode); 
-      }break;
-      case 2://нажали кнопку сет при юстировке
-      {
-        print_cyf(litres);
-        if(flag&1<<3 and flag&1<<2) {litres=0.0; curpos=1;mode=0;break;}// если кнопка Пуск зажата сбрасываем счетчик
-        if(flag&1<<4)// если кнопка сет нажата/зажата
-                { 
-          while(digitalRead(set_pin))
-          { if(litres<99.98) litres+=0.01;
-            else litres=99.99;
-            prntf(litres);
-           }
-        }
-        if(flag&1<<3)  // нажата кнопка Пуск
-        {
-          if (litres==0.0) break;
-          else curpos=4;
-        }
-      }break;
-      case 3: // Режим ar
-      {
-          if (flag&1<<3) count_and_time_rot(opt_pin);
-          if (flag&1<<3 and flag<<2) {prntf(0.0);curpos=1;mode=1;}
-      } break;
-      case 4:
-      {
-       if (flag&1<<3 or ) 
-      }
-    }
-}  */
