@@ -6,7 +6,8 @@ float litres=0.0; //количество литров, что будет выв�
 char rezhim[] = {'U','W','R'};
 byte mode=0;
 save_data S_D[10];
-digitalPinToInterrupt(pin)
+int_set_pin=digitalPinToInterrupt(set_pin);
+int_push_pin=digitalPinToInterrupt(push_pin);
 volatile bool IntFlag=false;//флаг прерывания на кнопке Пуск/Сет, ловим нажатие во время юстировки или работы
 //нужно за тем, что мы не знаем когда закончится пролив жидкости
 /*enum rezhim
@@ -99,9 +100,10 @@ void stop_inr() // убираем прерывание....Можно конеч�
 u_int time_and_count (float &time_of_close, &float time_of_open) 
 { 
   u_int count_of_rot=0;
- attachInterrupt(0, IntPush , CHANGE);
+ attachInterrupt(int_push_pin , IntPush , CHANGE);
  IntFlag=true;
  while(IntFlag)
+ {
   if(pulseIn(opt_pin,LOW)!=0)
   {
     time_of_close += pulseIn(opt_pin,LOW);
@@ -112,8 +114,9 @@ u_int time_and_count (float &time_of_close, &float time_of_open)
     time_of_open += pulseIn(opt_pin,HIGH);
     count_of_rot++;
   }
-return count_of_rot;
-dettachInterrupt(0, IntPush , CHANGE); 
+ }
+detachInterrupt(int_push_pin);
+ return count_of_rot;
 //в этой функции будет реализован подсчет количества оборотов крыльчатки и времени, на которое прерывается оптопара
 }
 void loop () 
