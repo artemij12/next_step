@@ -6,6 +6,9 @@ float litres=0.0; //количество литров, что будет выв�
 char rezhim[] = {'U','W','R'};
 byte mode=0;
 save_data S_D[10];
+digitalPinToInterrupt(pin)
+volatile bool IntFlag=false;//флаг прерывания на кнопке Пуск/Сет, ловим нажатие во время юстировки или работы
+//нужно за тем, что мы не знаем когда закончится пролив жидкости
 /*enum rezhim
 {
 U = 0 ,W = 1 ,R = 2 
@@ -20,6 +23,10 @@ pinMode(opt_pin,INPUT);//установка ножки камня на чтен�
 pinMode(set_pin,INPUT);
 pinMode(pusk_pin,INPUT);
 }
+void PushInt() //прерывание устанвливает флаг в false
+{
+ IntFlag=false;
+}
 byte push_btn(byte pin_)//  
 {
  int Min_t=millis();
@@ -31,7 +38,7 @@ byte push_btn(byte pin_)//
         else return 1; //Это значит кратковременное нажатие
       }
     }
-  return 2; // Зажаликнопку
+  return 2; // Зажали кнопку
 //Если клавиша нажата долго возвращем например 2 , т.е. счетчик досчитал до конца 
 //если нажата не долго 1
 //  дребезг или просто не нажата 0
@@ -89,20 +96,24 @@ void stop_inr() // убираем прерывание....Можно конеч�
 {
 
 }
-u_int time_and_count (float &time_of_close, float time_of_open) 
+u_int time_and_count (float &time_of_close, &float time_of_open) 
 { 
-  u_int count_of_rotation;
+  u_int count_of_rot=0;
+ attachInterrupt(0, IntPush , CHANGE);
+ IntFlag=true;
+ while(IntFlag)
   if(pulseIn(opt_pin,LOW)!=0)
   {
     time_of_close += pulseIn(opt_pin,LOW);
-    count_of_rotation++;
+    count_of_rot++;
   }
   if(pulseIn(opt_pin,HIGH)!=0)
   {
     time_of_open += pulseIn(opt_pin,HIGH);
-    count_of_rotation++;
+    count_of_rot++;
   }
-return count_of_rotation;
+return count_of_rot;
+dettachInterrupt(0, IntPush , CHANGE); 
 //в этой функции будет реализован подсчет количества оборотов крыльчатки и времени, на которое прерывается оптопара
 }
 void loop () 
